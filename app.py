@@ -29,7 +29,7 @@ if st.button("Realizar Predicción", key="btn_individual"):
         df_procesado = df_input.copy()
 
         # Cargar y aplicar el transformador/columnas de One-Hot para la variable Felder
-        one_hot_transformer = joblib.load('/content/one_hot_columns.joblib')
+        one_hot_transformer = joblib.load('despliegue2026_2/one_hot_columns.joblib')
 
         if isinstance(one_hot_transformer, list):
             si_columnas_one_hot = [col for col in one_hot_transformer if 'Felder_' in col]
@@ -51,7 +51,7 @@ if st.button("Realizar Predicción", key="btn_individual"):
                     df_procesado[col] = 0.0
 
         # Normalizar la variable Examen_admisión con 'min_max_scaler.joblib'
-        scaler = joblib.load('/content/min_max_scaler.joblib')
+        scaler = joblib.load('despliegue2026_2/min_max_scaler.joblib')
         df_procesado['Examen_admision_scaled'] = scaler.transform(df_procesado[['Examen_admisión']])[0][0]
         df_procesado = df_procesado.drop(columns=['Examen_admisión'], errors='ignore')
 
@@ -63,7 +63,7 @@ if st.button("Realizar Predicción", key="btn_individual"):
         st.dataframe(df_procesado)
 
         # Predicción con 'bagging_optimizado.joblib'
-        model = joblib.load('/content/bagging_optimizado.joblib')
+        model = joblib.load('despliegue2026_2/bagging_optimizado.joblib')
         prediccion = model.predict(df_procesado)
 
         st.success(f"La predicción del modelo (Nota Final Estimada) es: {prediccion[0]:.4f}")
@@ -99,9 +99,9 @@ if archivo_subido is not None:
             if st.button("Procesar y Evaluar Archivo", key="btn_masivo"):
                 with st.spinner("Procesando y generando predicciones..."):
                     # Cargar los componentes del pipeline
-                    one_hot_transformer = joblib.load('/content/one_hot_columns.joblib')
-                    scaler = joblib.load('/content/min_max_scaler.joblib')
-                    model = joblib.load('/content/bagging_optimizado.joblib')
+                    one_hot_transformer = joblib.load('despliegue2026_2/one_hot_columns.joblib')
+                    scaler = joblib.load('despliegue2026_2/min_max_scaler.joblib')
+                    model = joblib.load('despliegue2026_2/bagging_optimizado.joblib')
 
                     resultados = []
                     
