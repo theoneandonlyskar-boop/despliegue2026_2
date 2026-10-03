@@ -29,7 +29,7 @@ if st.button("Realizar Predicción", key="btn_individual"):
         df_procesado = df_input.copy()
 
         # Cargar y aplicar el transformador/columnas de One-Hot para la variable Felder
-        one_hot_transformer = joblib.load('despliegue2026_2/one_hot_columns.joblib')
+        one_hot_transformer = joblib.load('one_hot_columns.joblib')
 
         if isinstance(one_hot_transformer, list):
             si_columnas_one_hot = [col for col in one_hot_transformer if 'Felder_' in col]
@@ -51,7 +51,7 @@ if st.button("Realizar Predicción", key="btn_individual"):
                     df_procesado[col] = 0.0
 
         # Normalizar la variable Examen_admisión con 'min_max_scaler.joblib'
-        scaler = joblib.load('despliegue2026_2/min_max_scaler.joblib')
+        scaler = joblib.load('min_max_scaler.joblib')
         df_procesado['Examen_admision_scaled'] = scaler.transform(df_procesado[['Examen_admisión']])[0][0]
         df_procesado = df_procesado.drop(columns=['Examen_admisión'], errors='ignore')
 
@@ -63,7 +63,7 @@ if st.button("Realizar Predicción", key="btn_individual"):
         st.dataframe(df_procesado)
 
         # Predicción con 'bagging_optimizado.joblib'
-        model = joblib.load('despliegue2026_2/bagging_optimizado.joblib')
+        model = joblib.load('bagging_optimizado.joblib')
         prediccion = model.predict(df_procesado)
 
         st.success(f"La predicción del modelo (Nota Final Estimada) es: {prediccion[0]:.4f}")
@@ -99,39 +99,39 @@ if archivo_subido is not None:
             if st.button("Procesar y Evaluar Archivo", key="btn_masivo"):
                 with st.spinner("Procesando y generando predicciones..."):
                     # Cargar los componentes del pipeline
-                    one_hot_transformer = joblib.load('despliegue2026_2/one_hot_columns.joblib')
-                    scaler = joblib.load('despliegue2026_2/min_max_scaler.joblib')
-                    model = joblib.load('despliegue2026_2/bagging_optimizado.joblib')
+                    one_hot_transformer = joblib.load('one_hot_columns.joblib')
+                    scaler = joblib.load('min_max_scaler.joblib')
+                    model = joblib.load('bagging_optimizado.joblib')
 
                     resultados = []
-                    
+
                     # Procesar fila por fila de forma segura
                     for index, fila in df_archivo.iterrows():
                         df_temp = pd.DataFrame([fila])
-                        
+
                         # Aplicar One-Hot para Felder
                         if isinstance(one_hot_transformer, list):
                             for col in one_hot_transformer:
                                 if col.startswith('Felder_'):
                                     categoria = col.replace('Felder_', '')
                                     df_temp[col] = 1.0 if str(df_temp['Felder'].iloc[0]).lower() == str(categoria).lower() else 0.0
-                        
+
                         # Normalizar examen admisión
                         df_temp['Examen_admision_scaled'] = scaler.transform(df_temp[['Examen_admisión']])[0][0]
-                        
+
                         # Reordenar las columnas para el modelo
                         df_temp_procesado = df_temp[one_hot_transformer]
-                        
+
                         # Realizar predicción
                         pred = model.predict(df_temp_procesado)[0]
                         resultados.append(pred)
-                    
+
                     # Agregar resultados al dataframe original
                     df_archivo['Nota_Final_Predicha'] = resultados
-                    
+
                     st.subheader("Resultados Obtenidos")
                     st.dataframe(df_archivo)
-                    
+
                     # Permitir la descarga del resultado
                     if archivo_subido.name.endswith('.xlsx'):
                         # Exportar a excel para descarga en memoria
@@ -146,7 +146,7 @@ if archivo_subido is not None:
                         data_descarga = df_archivo.to_csv(index=False).encode('utf-8')
                         formato_descarga = "text/csv"
                         nombre_descarga = "predicciones_resultados.csv"
-                    
+
                     st.download_button(
                         label="Descargar resultados",
                         data=data_descarga,
